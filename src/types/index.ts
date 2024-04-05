@@ -1,6 +1,6 @@
 // тип, описывающий ошибки валидации форм
 export type FormErrors = Partial<Record<keyof IOrder, string>>;
-export type TPayment = 'online' | 'offline';
+export type TPayment = 'cash' | 'card';
 
 export interface IWebLarekApi {
 	getProductsList: () => Promise<IProduct[]>;
@@ -30,7 +30,7 @@ export interface IAppState {
 
 // Карточка товара
 export interface ICard extends IProduct {
-	index?: string; 
+	index?: string;
 	buttonName?: string;
 }
 
