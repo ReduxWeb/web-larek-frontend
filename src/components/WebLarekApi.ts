@@ -1,5 +1,10 @@
-import { IOrder, IOrderResult, IProduct, IWebLarekApi } from '../types';
+import { ICardDate, IOrder, IOrderResult } from '../types';
 import { Api, ApiListResponse } from './base/api';
+
+interface IWebLarekApi {
+	getProductList(): Promise<ICardDate[]>;
+	order(order: IOrder): Promise<IOrderResult>;
+}
 
 export class WebLarekApi extends Api implements IWebLarekApi {
 	readonly cdn: string;
@@ -8,10 +13,9 @@ export class WebLarekApi extends Api implements IWebLarekApi {
 		super(baseUrl, options);
 		this.cdn = cdn;
 	}
-
 	// Получить с сервера все продукты
-	getProductsList(): Promise<IProduct[]> {
-		return this.get('/product').then((data: ApiListResponse<IProduct>) =>
+	getProductList(): Promise<ICardDate[]> {
+		return this.get('/product').then((data: ApiListResponse<ICardDate>) =>
 			data.items.map((item) => ({
 				...item,
 				image: this.cdn + item.image,
@@ -19,16 +23,8 @@ export class WebLarekApi extends Api implements IWebLarekApi {
 		);
 	}
 
-	// Получить определенный продукт по ID
-	getProductId(id: string): Promise<IProduct> {
-		return this.get(`/product/${id}`).then((item: IProduct) => ({
-			...item,
-			image: this.cdn + item.image,
-		}));
-	}
-
-	// Отправка на сервер заказа
-	orderProduct(order: IOrder): Promise<IOrderResult> {
-		return this.post(`/order`, order).then((data: IOrderResult) => data);
+	// Отправка заказа на сервер
+	order(order: IOrder): Promise<IOrderResult> {
+		return this.post('/order', order).then((data: IOrderResult) => data);
 	}
 }

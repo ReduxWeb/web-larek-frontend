@@ -1,10 +1,15 @@
 import { Form } from './common/Form';
-import { IOrderContacts, IOrderDelivery, IActions } from '../types';
-import { IEvents } from './base/events';
+import { EventEmitter, IEvents } from './base/events';
 import { ensureElement } from '../utils/utils';
+import { IOrderDelivery, IOrderContacts } from '../types';
 
-// Класс OrderDelivery управляет формой заказа
-export class OrderDelivery extends Form<IOrderDelivery> {
+// Интерфейс для действий пользователя
+interface IActions {
+	onClick: (evt: MouseEvent) => void; // Обработчик клика
+}
+
+// Класс  управляет формой заказа
+export class OrderDeliveryForm extends Form<IOrderDelivery> {
 	protected _buttonCard: HTMLButtonElement;
 	protected _buttonCash: HTMLButtonElement;
 
@@ -19,6 +24,7 @@ export class OrderDelivery extends Form<IOrderDelivery> {
 			'button[name="cash"]',
 			this.container
 		);
+		this._buttonCard.classList.toggle('button_alt-active');
 
 		// Назначение обработчиков событий для кнопок
 		if (actions?.onClick) {
@@ -26,10 +32,15 @@ export class OrderDelivery extends Form<IOrderDelivery> {
 			this._buttonCash.addEventListener('click', actions.onClick);
 		}
 	}
-
-	toggleStateButton(target: HTMLElement) {
+	// Выбирает способ оплаты
+	toggleButton(target: HTMLElement) {
 		this._buttonCard.classList.toggle('button_alt-active');
 		this._buttonCash.classList.toggle('button_alt-active');
+	}
+	// Сбрасывает способ оплаты к значению по умолчанию
+	resetPaymentMethod() {
+		this._buttonCard.classList.add('button_alt-active');
+		this._buttonCash.classList.remove('button_alt-active');
 	}
 
 	// Установка адреса доставки
@@ -39,18 +50,17 @@ export class OrderDelivery extends Form<IOrderDelivery> {
 	}
 }
 
-// Класс OrderContact управляет формой контактов
-export class OrderContact extends Form<IOrderContacts> {
+// // Класс  управляет формой контактов
+export class OrderContactsForm extends Form<IOrderContacts> {
 	constructor(container: HTMLFormElement, events: IEvents) {
 		super(container, events);
 	}
-	// Установка номера телефона
+
 	set phone(value: string) {
 		(this.container.elements.namedItem('phone') as HTMLInputElement).value =
 			value;
 	}
 
-	// Установка адреса электронной почты
 	set email(value: string) {
 		(this.container.elements.namedItem('email') as HTMLInputElement).value =
 			value;

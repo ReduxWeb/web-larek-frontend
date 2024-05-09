@@ -1,7 +1,12 @@
 import { Component } from './base/Component';
-import { IPage } from '../types';
-import { ensureElement } from '../utils/utils';
 import { IEvents } from './base/events';
+import { ensureElement } from '../utils/utils';
+
+interface IPage {
+	counter: number;
+	catalog: HTMLElement[];
+	lockScroll: boolean;
+}
 
 export class Page extends Component<IPage> {
 	protected _counter: HTMLElement;
@@ -30,7 +35,7 @@ export class Page extends Component<IPage> {
 		this._catalog.replaceChildren(...items);
 	}
 
-	set locked(value: boolean) {
+	set lockScroll(value: boolean) {
 		if (value) {
 			this._wrapper.classList.add('page__wrapper_locked');
 		} else {

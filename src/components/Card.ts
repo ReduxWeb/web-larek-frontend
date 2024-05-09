@@ -1,9 +1,12 @@
+import { ICard } from '../types';
 import { Component } from './base/Component';
-import { ICard, IActions } from '../types';
 import { ensureElement } from '../utils/utils';
-import { cardCategory } from '../utils/constants';
+import { categoryColor } from '../utils/constants';
 
-// Класс карточки товара
+interface ICardActions {
+	onClick: (evt: MouseEvent) => void;
+}
+
 export class Card extends Component<ICard> {
 	protected _description: HTMLElement;
 	protected _image?: HTMLImageElement;
@@ -17,7 +20,7 @@ export class Card extends Component<ICard> {
 	constructor(
 		protected blockName: string,
 		container: HTMLElement,
-		actions?: IActions
+		actions?: ICardActions
 	) {
 		super(container);
 		this._index = container.querySelector('.basket__item-index');
@@ -37,7 +40,6 @@ export class Card extends Component<ICard> {
 		}
 	}
 
-	//SET,GET: ID
 	set id(value: string) {
 		this.container.dataset.id = value;
 	}
@@ -46,7 +48,6 @@ export class Card extends Component<ICard> {
 		return this.container.dataset.id || '';
 	}
 
-	//SET,GET: title
 	set title(value: string) {
 		this.setText(this._title, value);
 	}
@@ -55,19 +56,15 @@ export class Card extends Component<ICard> {
 		return this._title.textContent || '';
 	}
 
-	//SET: description
 	set description(value: string) {
 		this.setText(this._description, value);
 	}
 
-	//SET: image
-	set image(value: string) {
-		this.setImage(this._image, value, this.title);
-	}
-
-	//SET,GET: price
 	set price(value: number | null) {
-		this.setText(this._price, value ? `${value.toString()} синапсов` : '');
+		this.setText(
+			this._price,
+			value ? `${value.toString()} синапсов` : 'Бесценно'
+		);
 		this.disableButton(value);
 	}
 
@@ -75,17 +72,19 @@ export class Card extends Component<ICard> {
 		return Number(this._price.textContent || '');
 	}
 
-	//SET,GET: category
+	set image(value: string) {
+		this.setImage(this._image, value, this.title);
+	}
+
 	set category(value: string) {
 		this.setText(this._category, value);
-		this._category.classList.add(cardCategory[value]);
+		this._category.classList.add(categoryColor[value]);
 	}
 
 	get category(): string {
 		return this._category.textContent || '';
 	}
 
-	//SET,GET: index
 	set index(value: string) {
 		this._index.textContent = value;
 	}
@@ -94,14 +93,11 @@ export class Card extends Component<ICard> {
 		return this._index.textContent || '';
 	}
 
-	//SET buttonName
 	set buttonName(value: string) {
 		if (this._button) {
 			this._button.textContent = value;
 		}
 	}
-
-	// Метод для отключения кнопки цены
 	disableButton(value: number | null) {
 		if (!value) {
 			if (this._button) {

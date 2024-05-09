@@ -1,12 +1,15 @@
 import { Component } from '../base/Component';
-import { ensureElement } from '../../utils/utils';
 import { IEvents } from '../base/events';
-import { IModal } from '../../types';
+import { ensureElement } from '../../utils/utils';
 
-export class Modal extends Component<IModal> {
+interface IModalData {
+	content: HTMLElement;
+}
+
+export class Modal extends Component<IModalData> {
 	protected _closeButton: HTMLButtonElement;
 	protected _content: HTMLElement;
-	protected _closeEscHandler: (evt: KeyboardEvent) => void;
+	protected _closeEsc: (evt: KeyboardEvent) => void;
 
 	constructor(container: HTMLElement, protected events: IEvents) {
 		super(container);
@@ -19,37 +22,32 @@ export class Modal extends Component<IModal> {
 		this._closeButton.addEventListener('click', this.close.bind(this));
 		this.container.addEventListener('click', this.close.bind(this));
 		this._content.addEventListener('click', (event) => event.stopPropagation());
-		this._closeEscHandler = this.closeEsc.bind(this);
+		this._closeEsc = this.closeEsc.bind(this);
 	}
 
-	// Установка контента
-	set content(value: HTMLElement) {
-		this._content.replaceChildren(value);
+	set content(content: HTMLElement) {
+		this._content.replaceChildren(content);
 	}
 
-	// Открыть модальное окно
-	open() {
+	open(): void {
 		this.container.classList.add('modal_active');
 		this.events.emit('modal:open');
-		document.addEventListener('keydown', this._closeEscHandler);
+		document.addEventListener('keydown', this._closeEsc);
 	}
 
-	// Закрыть модальное окно
-	close() {
+	close(): void {
 		this.container.classList.remove('modal_active');
-		this.content = null;
 		this.events.emit('modal:close');
-		document.removeEventListener('keydown', this._closeEscHandler);
+		document.removeEventListener('keydown', this._closeEsc);
 	}
 
-	// Закрыть модальное окно на клавишу ESC
-	closeEsc(evt: KeyboardEvent) {
+	closeEsc(evt: KeyboardEvent): void {
 		if (evt.key === 'Escape') {
 			this.close();
 		}
 	}
 
-	render(data: IModal): HTMLElement {
+	render(data: IModalData): HTMLElement {
 		super.render(data);
 		this.open();
 		return this.container;
