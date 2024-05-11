@@ -18,12 +18,10 @@ export class AppState extends Model<IAppState> {
 	catalog: ICard[];
 	loading: boolean;
 	order: IOrder = {
-		payment: 'online',
+		payment: 'card',
 		address: '',
 		email: '',
 		phone: '',
-		total: 0,
-		items: [],
 	};
 	preview: string | null;
 	formErrors: FormErrors = {};
@@ -35,7 +33,7 @@ export class AppState extends Model<IAppState> {
 	// Очищает данные формы заказа
 	clearOrder() {
 		this.order = {
-			payment: 'online',
+			payment: 'card',
 			address: '',
 			email: '',
 			phone: '',
@@ -128,6 +126,10 @@ export class AppState extends Model<IAppState> {
 		if (Object.keys(errors).length === 0) {
 			this.events.emit('order:ready', this.order);
 		}
+	}
+	//Колличество товаров в корзине
+	getBasketItemsCount() {
+		return this.basket.length;
 	}
 
 	getTotal() {

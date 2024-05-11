@@ -1,7 +1,7 @@
 import { Form } from './common/Form';
-import { EventEmitter, IEvents } from './base/events';
+import { IEvents } from './base/events';
 import { ensureElement } from '../utils/utils';
-import { IOrderDelivery, IOrderContacts } from '../types';
+import { IOrderDelivery, IOrderContacts, TPayment } from '../types';
 
 // Интерфейс для действий пользователя
 interface IActions {
@@ -12,6 +12,7 @@ interface IActions {
 export class OrderDeliveryForm extends Form<IOrderDelivery> {
 	protected _buttonCard: HTMLButtonElement;
 	protected _buttonCash: HTMLButtonElement;
+	private _paymentMethod: TPayment = 'card';
 
 	constructor(container: HTMLFormElement, events: IEvents, actions?: IActions) {
 		super(container, events);
@@ -24,7 +25,9 @@ export class OrderDeliveryForm extends Form<IOrderDelivery> {
 			'button[name="cash"]',
 			this.container
 		);
-		this._buttonCard.classList.toggle('button_alt-active');
+
+		// Устанавливаем начальное состояние кнопок
+		this.toggleButton(this._paymentMethod);
 
 		// Назначение обработчиков событий для кнопок
 		if (actions?.onClick) {
@@ -32,11 +35,19 @@ export class OrderDeliveryForm extends Form<IOrderDelivery> {
 			this._buttonCash.addEventListener('click', actions.onClick);
 		}
 	}
-	// Выбирает способ оплаты
-	toggleButton(target: HTMLElement) {
-		this._buttonCard.classList.toggle('button_alt-active');
-		this._buttonCash.classList.toggle('button_alt-active');
+
+	// Установка текущего способа оплаты
+	setPaymentMethod(method: TPayment) {
+		this._paymentMethod = method;
+		this.toggleButton(method);
 	}
+
+	// Переключение способа оплаты
+	toggleButton(method: TPayment) {
+		this._buttonCard.classList.toggle('button_alt-active', method === 'card');
+		this._buttonCash.classList.toggle('button_alt-active', method === 'cash');
+	}
+
 	// Сбрасывает способ оплаты к значению по умолчанию
 	resetPaymentMethod() {
 		this._buttonCard.classList.add('button_alt-active');

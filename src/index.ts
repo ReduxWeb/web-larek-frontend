@@ -51,6 +51,9 @@ const orderContacts = new OrderContactsForm(
 	cloneTemplate(contactTemplate),
 	events
 );
+const successModal = new Success(cloneTemplate(successTemplate), {
+	onClick: () => modal.close(),
+});
 
 // Дальше идет бизнес-логика
 // Поймали событие, сделали что нужно
@@ -69,7 +72,7 @@ events.on<CatalogChangeEvent>('items:changed', () => {
 			price,
 		});
 	});
-	page.counter = appData.basket.length;
+	page.counter = appData.getBasketItemsCount();
 });
 
 // Открыть лот
@@ -109,16 +112,12 @@ events.on('card:toggle', (item: ICard) => {
 // Добавления товара в корзину
 events.on('card:add', (item: ICard) => {
 	appData.addToCardBasket(item);
-	// page.counter = appData.basket.length;
-	//console.log(appData.basket);
 	modal.close();
 });
 
 // Удаление товара из корзины
 events.on('card:delete', (item: ICard) => {
 	appData.deleteCardBasket(item);
-	console.log(appData.basket);
-	// page.counter = appData.basket.length;
 	modal.close();
 });
 
@@ -131,7 +130,7 @@ events.on('basket:open', () => {
 
 // Обновление корзины
 events.on('basket:change', () => {
-	page.counter = appData.basket.length; // Обновление счетчика
+	page.counter = appData.getBasketItemsCount(); // Обновление счетчика
 	basket.items = appData.basket.map((item, index) => {
 		const basketCardItem = new Card('card', cloneTemplate(basketCardTemplate), {
 			onClick: () => appData.deleteCardBasket(item),
@@ -149,24 +148,20 @@ events.on('basket:change', () => {
 events.on('order:open', () => {
 	modal.render({
 		content: orderDelivery.render({
-			payment: 'online',
+			payment: 'card',
 			address: '',
 			valid: false,
 			errors: [],
 		}),
 	});
-	appData.order.items = appData.basket.map((item) => item.id); // передаём список id товаров которые покупаем
 });
 
 // Смена способа оплаты заказа
 events.on('payment:changed', (target: HTMLElement) => {
-	if (!target.classList.contains('button_alt-active')) {
-		orderDelivery.toggleButton(target);
-		appData.order.payment = PaymentMethod[
-			target.getAttribute('name')
-		] as TPayment;
-		console.log(appData.order.payment);
-	}
+	const paymentMethod = target.getAttribute('name') as TPayment;
+	orderDelivery.setPaymentMethod(paymentMethod);
+	appData.order.payment = PaymentMethod[paymentMethod] as TPayment;
+	console.log(appData.order.payment);
 });
 
 // Открытие формы контактов
@@ -186,19 +181,20 @@ events.on('order:submit', () => {
 // Оформление заказа
 events.on('contacts:submit', () => {
 	api
-		.order(appData.order)
+		.order({
+			...appData.order,
+			items: appData.basket.map((item) => item.id),
+			total: appData.getTotal(),
+		})
 		.then((result) => {
 			appData.clearBasket(); // Очищаем корзину
 			appData.clearOrder(); // Очищаем форму заказа
-			const successModal = new Success(cloneTemplate(successTemplate), {
-				onClick: () => modal.close(),
-			});
 			modal.render({
 				content: successModal.render({
 					total: result.total,
 				}),
 			});
-			// console.log(result);
+			orderDelivery.resetPaymentMethod();
 		})
 		.catch((err) => {
 			console.error('Ошибка при оформлении заказа:', err);
@@ -241,15 +237,11 @@ events.on(
 // Блокируем прокрутку страницы если открыта модалка
 events.on('modal:open', () => {
 	page.lockScroll = true;
-	//console.log(appData.order.payment);
 });
 
 // ... и разблокируем
 events.on('modal:close', () => {
 	page.lockScroll = false;
-	appData.clearOrder();
-	orderDelivery.resetPaymentMethod();
-	//console.log(appData.order.payment);
 });
 
 // Проверка Api

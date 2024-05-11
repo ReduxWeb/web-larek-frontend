@@ -1,5 +1,5 @@
 export type FormErrors = Partial<Record<keyof IOrder, string>>;
-export type TPayment = 'online' | 'cash';
+export type TPayment = 'card' | 'cash';
 
 export interface ICardDate {
 	id: string;
@@ -23,8 +23,8 @@ export interface IAppState {
 }
 
 export interface IOrder extends IOrderDelivery, IOrderContacts {
-	total: number;
-	items: string[];
+	total?: number;
+	items?: string[];
 }
 
 export interface IOrderDelivery {

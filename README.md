@@ -104,8 +104,8 @@ interface IOrderContacts {
 
 ```
 interface IOrder extends IOrderDelivery, IOrderContacts {
-	total: number;
-	items: string[];
+	total?: number;
+	items?: string[];
 }
 ```
 
@@ -186,6 +186,7 @@ interface ISuccess {
 - `addToCardBasket` - Добавляет товар в корзину.
 - `deleteCardBasket` - Удаляет товар из корзины.
 - `basketChange` - Генерируем событие обновление корзины.
+- `getBasketItemsCount()` - Возвращает колличество товаров в корзине
 - `getTotal` - Вернуть общую сумму заказов.
 
 #### Класс WebLarekApi
@@ -328,14 +329,16 @@ actions?: ICardActions
 
 #### Методы класса:
 
-- `toggleButton(target: HTMLElement)` - Переключает активное состояние кнопок способа оплаты;
-- `resetPaymentMethod()` - Сбрасывает способ оплаты к значению по умолчанию
+- `toggleButton(method: TPayment)` - Переключает активное состояние кнопок способа оплаты.
+- `setPaymentMethod(method: TPayment)` - Установка текущего способа оплаты.
+- `resetPaymentMethod()` - Сбрасывает способ оплаты к значению по умолчанию.
 - `set address(value: string)` - Установка адреса доставки.
 
 #### Свойства класса:
 
 - `_buttonCard` - Кнопка выбора оплаты картой.
 - `_buttonCash` - Кнопка оплаты наличными.
+- `_paymentMethod` - хранения текущего способа оплаты.
 
 #### Класс OrderContactForm
 
