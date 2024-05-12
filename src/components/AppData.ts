@@ -127,9 +127,18 @@ export class AppState extends Model<IAppState> {
 			this.events.emit('order:ready', this.order);
 		}
 	}
-	//Колличество товаров в корзине
+	//Возвращает колличество товаров в корзине
 	getBasketItemsCount() {
 		return this.basket.length;
+	}
+
+	// Возвращает текст кнопки для карточки товара
+	getButtonName(item: ICard) {
+		return this.basket.indexOf(item) < 0 ? 'В корзину' : 'Удалить из корзины';
+	}
+
+	getBasketIndexOf(item: ICard) {
+		return this.basket.indexOf(item) < 0;
 	}
 
 	getTotal() {

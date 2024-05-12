@@ -72,7 +72,6 @@ events.on<CatalogChangeEvent>('items:changed', () => {
 			price,
 		});
 	});
-	page.counter = appData.getBasketItemsCount();
 });
 
 // Открыть лот
@@ -87,7 +86,7 @@ events.on('preview:changed', (item: ICard) => {
 			events.emit('card:toggle', item);
 		},
 	});
-	//console.log(appData.basket.indexOf(item));
+	const buttonName = appData.getButtonName(item);
 	modal.render({
 		content: cardPreview.render({
 			title: item.title,
@@ -95,14 +94,13 @@ events.on('preview:changed', (item: ICard) => {
 			image: item.image,
 			price: item.price,
 			category: item.category,
-			buttonName:
-				appData.basket.indexOf(item) < 0 ? 'В корзину' : 'Удалить из корзины',
+			buttonName: buttonName,
 		}),
 	});
 });
 
 events.on('card:toggle', (item: ICard) => {
-	if (appData.basket.indexOf(item) < 0) {
+	if (appData.getBasketIndexOf(item)) {
 		events.emit('card:add', item);
 	} else {
 		events.emit('card:delete', item);
@@ -161,12 +159,10 @@ events.on('payment:changed', (target: HTMLElement) => {
 	const paymentMethod = target.getAttribute('name') as TPayment;
 	orderDelivery.setPaymentMethod(paymentMethod);
 	appData.order.payment = PaymentMethod[paymentMethod] as TPayment;
-	console.log(appData.order.payment);
 });
 
 // Открытие формы контактов
 events.on('order:submit', () => {
-	console.log(appData.order);
 	appData.order.total = appData.getTotal(); // Записываем в состояние сумму
 	modal.render({
 		content: orderContacts.render({
